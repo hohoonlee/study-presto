@@ -15,10 +15,10 @@ router.post('/tables', function(req, res, next) {
 
 router.post('/query', function(req, res, next) {
     var q = req.body.q;
-    console.log(q, q.length);
+    //console.log(q, q.length);
     q = q.trim();
     if(q.lastIndexOf(';') === q.length-1) q = q.substring(0, q.length -1);
-    console.log(q, q.length);
+    // console.log(q, q.length);
 
     presto.query(q, function(err, data, cols) {
         if(err) {
