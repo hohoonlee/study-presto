@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ko">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!-- 합쳐지고 최소화된 최신 CSS -->
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+        <!-- 부가적인 테마 -->
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
+        <link rel="stylesheet" href="//bootstrapk.com/examples/dashboard/dashboard.css">
+
+        <!-- 합쳐지고 최소화된 최신 자바스크립트 -->
+        <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+
+        <script>
+            $(document).on('click', 'ul.nav-sidebar a', function() {
+                $('#query').val('select * from ' + $(this).text());
+            });
+
+            $(document).on('click', '#query-btn', function() {
+                $.ajax({
+                    type: 'POST',
+                    url: '/api/query',
+                    data: {'q':$('#query').val()},
+                    success: function(data) {
+                        if(data.err) return alert(err);
+                        var h = ['<tr>','<th>#</th>'];
+                        _.each(data.cols, function(col) {
+                            h.push('<th>' + col.name + '</th>');
+                        });
+                        h.push('</tr>');
+                        $('#list thead').html(h.join(''));
+
+                        var r = [];
+                        _.each(data.list, function(info, i){
+                            r.push('<tr>');
+                            r.push('<td>' + (i+1) + '</td>');
+                            for(var i = 0; i < data.cols.length; i++) {
+                                r.push('<td>'+info[i]+'</td>');
+                            }
+                            r.push('</tr>');
+                        });
+                        $('#list tbody').html(r.join(''));
+                        console.log(data);
+                    },
+                    error: function(err) {
+                        alert('오류가 발생했습니다.'+err.responseJSON.err.message);
+                    },
+                    dataType: 'json'
+                });
+            });
+
+            $(document).on('click', '.connect-btn', function() {
+                var host = $('#connect-host').val();
+                if(!host) return alert('host를 입력해주세요.');
+                var port = $('#connect-port').val();
+                if(!port) return alert('port를 입력해주세요.');
+                var catalog = $('#connect-catalog').val();
+                if(!catalog) return alert('catalog를 입력해주세요.');
+                var schema = $('#connect-schema').val();
+                if(!schema) return alert('schema를 입력해주세요.');
+
+                var obj = {'host':host, 'port':port, 'catalog':catalog, 'schema':schema};
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/api/tables',
+                    data: obj,
+                    success: function(data) {
+                        if(data.err) return alert(err);
+                        $('ul.nav-sidebar').html('');
+                        _.each(data.list, function(o) {
+                            $('ul.nav-sidebar').append('<li><a>'+o[0]+'</a></li>');
+                        });
+                    },
+                    dataType: 'json'
+                });
+            });
+        </script>
+    </head>
+    <body>
+        <nav class="navbar navbar-inverse navbar-fixed-top">
+          <div class="container-fluid">
+            <div class="navbar-header">
+              <!-- <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button> -->
+              <a class="navbar-brand" href="#">Presto Client</a>
+            </div>
+            <div id="navbar" class="navbar-collapse collapse">
+              <ul class="nav navbar-nav navbar-right">
+                <li><a href="#" class="connect-btn">연결</a></li>
+              </ul>
+              <form class="navbar-form navbar-right">
+                <input type="text" id="connect-host" class="form-control" style="width:200px;" placeholder="host" value="namenode.hadoop.kr"/>
+                <input type="text" id="connect-port" class="form-control" placeholder="port" value="8012"/>
+                <input type="text" id="connect-catalog" class="form-control" placeholder="catalog" value="hive"/>
+                <input type="text" id="connect-schema" class="form-control" placeholder="schema" value="default"/>
+              </form>
+            </div>
+          </div>
+        </nav>
+
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-sm-3 col-md-2 sidebar">
+              <ul class="nav nav-sidebar">
+                <!-- <li class="active"><a href="#">Overview <span class="sr-only">(current)</span></a></li>
+                <li><a href="#">Reports</a></li>
+                <li><a href="#">Analytics</a></li>
+                <li><a href="#">Export</a></li> -->
+              </ul>
+            </div>
+            <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+                <textarea id="query" class="form-control" rows="3"></textarea>
+                <button id="query-btn" type="button" class="btn btn-primary">조회</button>
+              <div class="table-responsive">
+                <table id="list" class="table table-striped">
+                  <thead>
+                  </thead>
+                  <tbody>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+    </body>
+</html>
