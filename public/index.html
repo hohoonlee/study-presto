@@ -38,7 +38,7 @@
                         _.each(data.list, function(info, i){
                             r.push('<tr>');
                             r.push('<td>' + (i+1) + '</td>');
-                            for(var i = 0; i < data.cols.length; i++) {
+                            for(var i = 0; i < info.length; i++) {
                                 r.push('<td>'+info[i]+'</td>');
                             }
                             r.push('</tr>');
