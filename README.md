@@ -16,6 +16,12 @@
 
 > [hadoop@client ~]$ node -v
 
+> [hadoop@client ~]$ nvm alias default v6.11.1
+
+> [hadoop@client ~]$ echo 'nvm use default' >> ~/.bashrc
+
+> [hadoop@client ~]$ source ~/.bashrc
+
 * npm 최신 버전 upgrade
 
 > [hadoop@client ~]$ npm install npm -g
